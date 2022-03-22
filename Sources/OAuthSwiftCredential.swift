@@ -119,6 +119,7 @@ open class OAuthSwiftCredential: NSObject, NSSecureCoding, Codable {
     open var oauthToken = ""
     open var oauthRefreshToken = ""
     open var oauthTokenSecret = ""
+    open var oauthAuthorizationCode: String?
     open var oauthTokenExpiresAt: Date?
     open internal(set) var oauthVerifier = ""
     open var version: Version = .oauth1
@@ -134,6 +135,10 @@ open class OAuthSwiftCredential: NSObject, NSSecureCoding, Codable {
     public init(consumerKey: String, consumerSecret: String) {
         self.consumerKey = consumerKey
         self.consumerSecret = consumerSecret
+    }
+    
+    public init(oauthAuthorizationCode: String) {
+        self.oauthAuthorizationCode = oauthAuthorizationCode
     }
 
     // MARK: NSCoding protocol
