@@ -105,7 +105,13 @@ open class OAuth2Swift: OAuthSwift {
     }
 
     @discardableResult
-    open func authorize(withCallbackURL callbackURL: URLConvertible?, scope: String, state: String, parameters: Parameters = [:], headers: OAuthSwift.Headers? = nil, completionHandler completion: @escaping TokenCompletionHandler) -> OAuthSwiftRequestHandle? {
+    open func authorize(withCallbackURL callbackURL: URLConvertible?,
+                        scope: String,
+                        state: String,
+                        justAuthorizationCode: Bool = false,
+                        parameters: Parameters = [:],
+                        headers: OAuthSwift.Headers? = nil,
+                        completionHandler completion: @escaping TokenCompletionHandler) -> OAuthSwiftRequestHandle? {
 
         OAuthSwift.log?.trace("Start authorization ...")
         if let url = callbackURL, url.url == nil {
@@ -153,6 +159,19 @@ open class OAuth2Swift: OAuthSwift {
                 } else {
                     callbackURLEncoded = nil
                 }
+                
+                if justAuthorizationCode {
+                    let credential = OAuthSwiftCredential(oauthAuthorizationCode: code.safeStringByRemovingPercentEncoding)
+                    let tokenSuccess = TokenSuccess(credential, nil, responseParameters)
+                    completion(.success(tokenSuccess))
+                } else {
+                    if let handle = this.postOAuthAccessTokenWithRequestToken(
+                        byCode: code.safeStringByRemovingPercentEncoding,
+                        callbackURL: callbackURLEncoded, headers: headers, completionHandler: completion) {
+                        this.putHandle(handle, withKey: UUID().uuidString)
+                    }
+                }
+                
                 if let handle = this.postOAuthAccessTokenWithRequestToken(
                     byCode: code.safeStringByRemovingPercentEncoding,
                     callbackURL: callbackURLEncoded, headers: headers, completionHandler: completion) {
